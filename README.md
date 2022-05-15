@@ -10,20 +10,20 @@ The second functionality is !find-tactics which takes a specified number of prev
 (and solutions) that the player can then input into Chessable or another chess database software to read the positions. 
 
 For example:
->>> !find-tactics
+-> !find-tactics
 Please enter your Lichess username
->>> KnightOutpostOP
+-> KnightOutpostOP
 Please enter the number of games you would like to review
->>> 10
+-> 10
 puzzles.pgn
 
 The final feature is !analyze-game which evaluates the most recently played chess game from Chess.com and returns the evaluations compiled in a pgn file which can be 
 imported into databases such as Scid. 
 
 For example:
->>> !analyze-game
+-> !analyze-game
 Please enter your Chess.com username
->>> KnightOutpostOP
+-> KnightOutpostOP
 moves2.pgn
 
 NOTE: Currently this bot is not available for public access but the link to adding the bot to your Discord server is below,

@@ -334,9 +334,6 @@ async def analyze(ctx):
         def check(username):
                 return username.author == ctx.author and username.channel == ctx.channel
         username = (await bot.wait_for("message", check=check)).content
-
-        #GET RID OF THIS PART VVV
-        # await ctx.channel.send(username.content)
         
         await ctx.channel.send("Please enter the number of games you would like to review")
 
@@ -370,8 +367,6 @@ async def analyze(ctx):
                         if "Standard" not in line:
                                 variant = "NOT STANDARD"
 
-        #GET RID OF THIS PART VVV
-        # await ctx.channel.send(games.content)
         
         await ctx.channel.send(file=discord.File("puzzles.pgn"))
 
@@ -387,14 +382,10 @@ async def analyze(ctx):
                 return username2.author == ctx.author and username2.channel == ctx.channel
         username2 = (await bot.wait_for("message", check=check)).content
 
-        # #GET RID OF THIS PART VVV
-        # await ctx.channel.send(username2)
-
         DATE = str(date.today())
-        # year = DATE[0:4]
-        # month = DATE[6:8]
-        year = "2022"
-        month = "05"
+        year = DATE[0:4]
+        month = DATE[6:8]
+
 
         URL = "https://api.chess.com/pub/player/"+username2+"/games/"+year+"/"+month
         x = requests.get(URL)

@@ -16,11 +16,6 @@ import io
 from dotenv import load_dotenv
 from discord.ext import commands
 
-# LOADS THE .ENV FILE THAT RESIDES ON THE SAME LEVEL AS THE SCRIPT.
-load_dotenv()
-
-# GRAB THE API TOKEN FROM THE .ENV FILE.
-# DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_TOKEN = input("WHAT IS THE DISCORD TOKEN?")
 ACCESS_KEY = input("WHAT IS THE ACCESS KEY?")
 SECRET = input("WHAT IS THE SECRET KEY?")

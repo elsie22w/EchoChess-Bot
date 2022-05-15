@@ -10,11 +10,17 @@ The second functionality is !find-tactics which takes a specified number of prev
 (and solutions) that the player can then input into Chessable or another chess database software to read the positions. 
 
 For example:
+
 -> !find-tactics
+
 Please enter your Lichess username
+
 -> KnightOutpostOP
+
 Please enter the number of games you would like to review
+
 -> 10
+
 puzzles.pgn
 
 The final feature is !analyze-game which evaluates the most recently played chess game from Chess.com and returns the evaluations compiled in a pgn file which can be 

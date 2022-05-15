@@ -27,9 +27,13 @@ The final feature is !analyze-game which evaluates the most recently played ches
 imported into databases such as Scid. 
 
 For example:
+
 -> !analyze-game
+
 Please enter your Chess.com username
+
 -> KnightOutpostOP
+
 moves2.pgn
 
 NOTE: Currently this bot is not available for public access but the link to adding the bot to your Discord server is below,

@@ -34,7 +34,6 @@ def translate(notation):
 
 #AWS STUFF
 
-
 s3 = boto3.resource('s3',
     aws_access_key_id=ACCESS_KEY,
     aws_secret_access_key= SECRET)
@@ -98,7 +97,6 @@ async def scan(ctx):
         region='us-east-1'
 
         s3.Bucket(bucket).upload_file(imageName, "newEchoChess3.jpg")
-
         
         newLis = []
 
@@ -258,72 +256,70 @@ class puzzleFinder():
         return ret
                 
 
-    def sendToFile(game, stuff):
-        mateinOnes = puzzleFinder.findAllMateInOne(game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        mateinTwos = puzzleFinder.findAllMateInTwo(game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-
+    def sendToFile(gamesList):
         fname = "puzzles.pgn"
-        FILE = open(fname, "a")
+        FILE = open(fname, "w")
+        for game, stuff in gamesList:
+            mateinOnes = puzzleFinder.findAllMateInOne(game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+            mateinTwos = puzzleFinder.findAllMateInTwo(game, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+            
+            
+            for BOARD, lis in mateinOnes:
+                ans = str(lis[0][0])
+                res = lis[0][1]
         
-        for BOARD, lis in mateinOnes:
-            ans = str(lis[0][0])
-            res = lis[0][1]
-    
-            piece = str(BOARD.piece_at(puzzleFinder.square(ans[0:2])))
-            for i in stuff:
-                FILE.write(i+"\n")
-            line = str(BOARD.board_fen)
-            FEN = line[line.index("(")+2:line.index(")")-1]
-            FILE.write('[FEN "'+FEN+'"]'+"\n")
-            FILE.write("\n")
-            if ord(piece) >= 97:
-                piece = piece.upper()
-                FILE.write("1... "+piece+ans[:]+"\n")
-            else:
-                FILE.write("1. "+piece+ans[:]+"\n")
-            FILE.write(res+"\n\n")
-
-        for BOARD, lis in mateinTwos:
-
-            allAns = str(lis[0]).split()
-            res = lis[1]
-            ans = []
-
-            for i in stuff:
-                FILE.write(i+"\n")
-
-            line = str(BOARD.board_fen)
-            FEN = line[line.index("(")+2:line.index(")")-1]
-            FILE.write('[FEN "'+FEN+'"]'+"\n\n")
-
-            for m in allAns:
-                move = m[m.index("'")+1: m.rfind("'")]
-                piece = str(BOARD.piece_at(puzzleFinder.square(move[0:2])))
-                BOARD.push_san(move)
-                if piece != "p" and piece != "P":
-                    ans.append(piece+move)
+                piece = str(BOARD.piece_at(puzzleFinder.square(ans[0:2])))
+                for i in stuff:
+                    FILE.write(i+"\n")
+                line = str(BOARD.board_fen)
+                FEN = line[line.index("(")+2:line.index(")")-1]
+                FILE.write('[FEN "'+FEN+'"]'+"\n")
+                FILE.write("\n")
+                if ord(piece) >= 97:
+                    piece = piece.upper()
+                    FILE.write("1... "+piece+ans[:]+"\n")
                 else:
-                    ans.append(move)
+                    FILE.write("1. "+piece+ans[:]+"\n")
+                FILE.write(res+"\n\n")
 
-            if ord(ans[0][0]) >= 97:
-                FILE.write("1... "+ans[0]+" ")
-                FILE.write("2. "+ans[1]+" ")
-                FILE.write("2..."+ans[2]+"\n")
-            else:
-                FILE.write("1. "+ans[0]+" ")
-                FILE.write("1... "+ans[1]+" ")
-                FILE.write("2. "+ans[2]+"\n")
+            for BOARD, lis in mateinTwos:
 
-            FILE.write(res+"\n\n")
+                allAns = str(lis[0]).split()
+                res = lis[1]
+                ans = []
 
-        return FILE
+                for i in stuff:
+                    FILE.write(i+"\n")
 
+                line = str(BOARD.board_fen)
+                FEN = line[line.index("(")+2:line.index(")")-1]
+                FILE.write('[FEN "'+FEN+'"]'+"\n\n")
 
+                for m in allAns:
+                    move = m[m.index("'")+1: m.rfind("'")]
+                    piece = str(BOARD.piece_at(puzzleFinder.square(move[0:2])))
+                    BOARD.push_san(move)
+                    if piece != "p" and piece != "P":
+                        ans.append(piece+move)
+                    else:
+                        ans.append(move)
+
+                if ord(ans[0][0]) >= 97:
+                    FILE.write("1... "+ans[0]+" ")
+                    FILE.write("2. "+ans[1]+" ")
+                    FILE.write("2..."+ans[2]+"\n")
+                else:
+                    FILE.write("1. "+ans[0]+" ")
+                    FILE.write("1... "+ans[1]+" ")
+                    FILE.write("2. "+ans[2]+"\n")
+
+                FILE.write(res+"\n\n")
 
 # FIND TATICS
 @bot.command(name="find-tactics", help = 'finds possible strategies and possible moves')
 async def analyze(ctx):
         global username, games
+
         await ctx.channel.send("Please enter your Lichess username")
         
         def check(username):
@@ -346,12 +342,14 @@ async def analyze(ctx):
         stuff = stuff.split("\\n")
 
         lis = []
-        ret = []
+        toReview = []
+
         variant = "Standard"
         for line in stuff:
                 if line[0:2] == "1.":
                         if variant == "Standard":
-                                ret = puzzleFinder.sendToFile(line, lis)
+                                toReview.append([line, lis])
+                                # ret = puzzleFinder.sendToFile(line, lis)
                                 lis = []
                                 variant = "Standard"
                         
@@ -362,10 +360,8 @@ async def analyze(ctx):
                         if "Standard" not in line:
                                 variant = "NOT STANDARD"
 
-        
+        puzzleFinder.sendToFile(toReview)
         await ctx.channel.send(file=discord.File("puzzles.pgn"))
-
-
 
 # ANALYZE GAME
 @bot.command(name="analyze-game", help = 'provides an analysis of most recent game')
@@ -379,8 +375,7 @@ async def analyze(ctx):
 
         DATE = str(date.today())
         year = DATE[0:4]
-        month = DATE[6:8]
-
+        month = DATE[5:7]
 
         URL = "https://api.chess.com/pub/player/"+username2+"/games/"+year+"/"+month
         x = requests.get(URL)
@@ -395,11 +390,9 @@ async def analyze(ctx):
                 if len(stuff[i]) > 2:
                         if stuff[i][0:2] == "1.":
                                 lis.append(stuff[i])
-
+    
         game = lis[-1]
-
         inBracket = False
-
         parsedGame = ""
 
         for i in range(len(game)):
@@ -422,23 +415,24 @@ async def analyze(ctx):
                 finalGame.append(i)
 
         board = chess.Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-
-        engine = chess.engine.SimpleEngine.popen_uci(r"C:\Users\alanb\Downloads\stockfish_15_win_x64_avx2\stockfish_15_win_x64_avx2\stockfish_15_x64_avx2.exe")
-
+        engineFileName = input("WHAT IS THE ENGINE FILE NAME?")
+        engine = chess.engine.SimpleEngine.popen_uci(engineFileName)
+        
         fname = "games.pgn"
-        FILE = open(fname, "a")
-
-        moveNum = 1
-        player = "WHITE"
+        FILE = open(fname, "w")
 
         FILE.write('[Event ""]\n')
-        FILE.write('[Site ""]\n')
+        FILE.write('[Site Chess.com]\n')
         FILE.write('[Date "????.??.??"]\n')
         FILE.write('[Round ""]\n')
         FILE.write('[White ""]\n')
         FILE.write('[Black ""]\n')
         FILE.write('[Result "*"]\n')
-        FILE.write('[FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]\n')
+        FILE.write("\n")
+        #FILE.write('[FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]\n')
+
+        moveNum = 1
+        player = "WHITE"
 
         for move in finalGame:
                 info = engine.analyse(board, chess.engine.Limit(depth = 20))
@@ -455,8 +449,10 @@ async def analyze(ctx):
                         player = "WHITE"
                         moveNum += 1
 
+        engine.close()
+        FILE.close()
         await ctx.channel.send(file=discord.File("games.pgn"))
-
+        
 # EXECUTES THE BOT WITH THE SPECIFIED TOKEN. TOKEN HAS BEEN REMOVED AND USED JUST AS AN EXAMPLE.
 
 bot.run(DISCORD_TOKEN)
